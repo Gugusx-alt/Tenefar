@@ -22,7 +22,8 @@ class InfoProjeto {
       'Proteína de baixo custo e baixo impacto ambiental, a partir da '
       'larva-da-farinha, para quem mais precisa.';
   static const instituicao =
-      'Universidade Tecnológica Federal do Paraná (UTFPR)';
+      'Universidade Estadual do Oeste do Paraná (Unioeste)';
+  static const siglaInstituicao = 'Unioeste';
   static const programa =
       'Pró-Reitoria de Pesquisa e Pós-Graduação · Programa de Iniciação Científica (PIBIC)';
   static const area =
@@ -54,16 +55,12 @@ class InfoProjeto {
 }
 
 // ---------------------------------------------------------------------------
-// Placeholders da equipe e contato — PREENCHA AQUI
+// Contato (aparece no rodapé) — PREENCHA AQUI
 // ---------------------------------------------------------------------------
 
-class Equipe {
-  Equipe._();
+class Contato {
+  Contato._();
 
-  static const estudante = '[Nome do(a) estudante]';
-  static const orientador = '[Nome do(a) orientador(a)]';
-  static const campus = '[Câmpus UTFPR]';
-  static const grupoPesquisa = '[Grupo de pesquisa]';
   static const email = '[E-mail de contato]';
 }
 

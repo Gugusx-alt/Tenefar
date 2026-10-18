@@ -9,12 +9,16 @@ class GradeResponsiva extends StatelessWidget {
     this.larguraMinimaItem = 260,
     this.maxColunas = 4,
     this.espaco = 16,
+    this.espacoVertical,
   });
 
   final List<Widget> children;
   final double larguraMinimaItem;
   final int maxColunas;
   final double espaco;
+
+  /// Espaço entre linhas; por padrão igual a [espaco].
+  final double? espacoVertical;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class GradeResponsiva extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (var i = 0; i < linhas.length; i++) ...[
-              if (i > 0) SizedBox(height: espaco),
+              if (i > 0) SizedBox(height: espacoVertical ?? espaco),
               linhas[i],
             ],
           ],

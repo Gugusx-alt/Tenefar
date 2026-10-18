@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/card_info.dart';
 import '../widgets/grade_responsiva.dart';
+import '../widgets/indice.dart';
+import '../widgets/marca_texto.dart';
 import '../widgets/ods_card.dart';
 import '../widgets/secao.dart';
 import '../widgets/texto_rico.dart';
@@ -14,155 +16,135 @@ class ProjetoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final corpo = tema.textTheme.bodyLarge?.copyWith(height: 1.6);
+    final m = context.marca;
+    final corpo = tema.textTheme.bodyLarge;
 
     return AppScaffold(
-      titulo: 'O Projeto',
+      titulo: 'Projeto',
       children: [
-        // ----- Cabeçalho -----
-        Secao(
-          sobretitulo: 'O Projeto',
-          decoracao: BoxDecoration(
-            color: esquema.primaryContainer.withValues(alpha: 0.35),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: TextoRico(
-                  InfoProjeto.titulo,
-                  estilo: tema.textTheme.headlineSmall?.copyWith(height: 1.25),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextoRico(InfoProjeto.resumo, estilo: corpo),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final palavra in InfoProjeto.palavrasChave)
-                    Chip(label: TextoRico(palavra)),
-                ],
-              ),
-            ],
+        CabecalhoPagina(
+          numero: '02',
+          rotulo: 'Projeto',
+          titulo: InfoProjeto.titulo,
+          introducao: InfoProjeto.resumo,
+          extra: Text(
+            InfoProjeto.palavrasChave
+                .map(semMarcadores)
+                .join('  /  ')
+                .toUpperCase(),
+            style: m.mono.copyWith(
+              fontSize: 12,
+              letterSpacing: 1.2,
+              color: m.textoSuave,
+            ),
           ),
         ),
 
         // ----- O problema -----
-        Secao(
-          titulo: 'O problema',
+        SecaoEditorial(
+          numero: '01',
+          rotulo: 'O problema',
+          titulo: 'Desnutrição aguda e a falta de proteína',
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final p in Problema.paragrafos) ...[
-                Text(p, style: corpo),
-                const SizedBox(height: 12),
-              ],
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: esquema.secondaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.monitor_weight_outlined,
-                      size: 36,
-                      color: esquema.onSecondaryContainer,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        Problema.recomendacao,
-                        style: tema.textTheme.titleMedium?.copyWith(
-                          color: esquema.onSecondaryContainer,
-                          height: 1.45,
-                        ),
-                      ),
-                    ),
+                    for (final p in Problema.paragrafos) ...[
+                      Text(p, style: corpo),
+                      const SizedBox(height: 16),
+                    ],
                   ],
                 ),
               ),
+              const SizedBox(height: 40),
+              const _Recomendacao(),
             ],
           ),
         ),
 
         // ----- Por que Tenebrio molitor -----
-        Secao(
+        SecaoEditorial(
+          numero: '02',
+          rotulo: 'Vantagens',
           titulo: 'Por que *Tenebrio molitor*?',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               GradeResponsiva(
-                larguraMinimaItem: 220,
+                larguraMinimaItem: 300,
+                maxColunas: 2,
+                espaco: 40,
+                espacoVertical: 0,
                 children: [
-                  for (final v in vantagensTenebrio)
-                    CardInfo(icone: v.icone, titulo: v.titulo),
+                  for (var i = 0; i < vantagensTenebrio.length; i++)
+                    ItemNumerado(
+                      numero: i + 1,
+                      texto: vantagensTenebrio[i].titulo,
+                      estilo: tema.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w500)
+                          .fonte,
+                    ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               Text(
-                'Fontes: $fonteVantagens',
-                style: tema.textTheme.bodySmall?.copyWith(
-                  color: esquema.onSurfaceVariant,
-                ),
+                'FONTES: ${fonteVantagens.toUpperCase()}',
+                style: m.mono.copyWith(fontSize: 12, color: m.textoSuave),
               ),
             ],
           ),
         ),
 
         // ----- Objetivos -----
-        Secao(
-          titulo: 'Objetivos',
+        SecaoEditorial(
+          numero: '03',
+          rotulo: 'Objetivos',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: esquema.primary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'OBJETIVO GERAL',
-                      style: tema.textTheme.labelLarge?.copyWith(
-                        color: esquema.onPrimary.withValues(alpha: 0.85),
-                        letterSpacing: 1.4,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextoRico(
-                      objetivoGeral,
-                      estilo: tema.textTheme.titleLarge?.copyWith(
-                        color: esquema.onPrimary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
+              Text(
+                'OBJETIVO GERAL',
+                style: m.mono.copyWith(
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                  color: m.textoSuave,
                 ),
               ),
-              const SizedBox(height: 24),
-              Text('Objetivos específicos', style: tema.textTheme.titleLarge),
               const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.only(left: 28),
+                decoration: BoxDecoration(
+                  border: Border(left: BorderSide(color: m.destaque, width: 3)),
+                ),
+                child: TextoRico(
+                  objetivoGeral,
+                  estilo: tema.textTheme.headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.w300, height: 1.3)
+                      .fonte,
+                ),
+              ),
+              const SizedBox(height: 64),
+              Text(
+                'OBJETIVOS ESPECÍFICOS',
+                style: m.mono.copyWith(
+                  fontSize: 12,
+                  letterSpacing: 1.2,
+                  color: m.textoSuave,
+                ),
+              ),
+              const SizedBox(height: 12),
               GradeResponsiva(
                 larguraMinimaItem: 300,
                 maxColunas: 2,
-                espaco: 12,
+                espaco: 40,
+                espacoVertical: 0,
                 children: [
                   for (var i = 0; i < objetivosEspecificos.length; i++)
-                    _ObjetivoItem(
-                      numero: i + 1,
-                      texto: objetivosEspecificos[i],
-                    ),
+                    ItemNumerado(numero: i + 1, texto: objetivosEspecificos[i]),
                 ],
               ),
             ],
@@ -170,30 +152,38 @@ class ProjetoPage extends StatelessWidget {
         ),
 
         // ----- ODS -----
-        Secao(
+        SecaoEditorial(
+          numero: '04',
+          rotulo: 'ODS',
           titulo: 'Objetivos de Desenvolvimento Sustentável',
           child: GradeResponsiva(
-            larguraMinimaItem: 180,
-            maxColunas: 5,
+            larguraMinimaItem: 240,
+            maxColunas: 3,
+            espaco: 32,
+            espacoVertical: 0,
             children: [for (final ods in odsProjeto) OdsCard(ods: ods)],
           ),
         ),
 
         // ----- Resultados -----
-        Secao(
-          titulo: 'Resultados',
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SeloStatus(InfoProjeto.status),
-                  const SizedBox(height: 14),
-                  Text(textoResultados, style: corpo),
-                ],
+        SecaoEditorial(
+          numero: '05',
+          rotulo: 'Resultados',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const StatusAndamento(texto: InfoProjeto.status),
+              const SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Text(
+                  textoResultados,
+                  style: tema.textTheme.headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.w300)
+                      .fonte,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ],
@@ -201,42 +191,48 @@ class ProjetoPage extends StatelessWidget {
   }
 }
 
-class _ObjetivoItem extends StatelessWidget {
-  const _ObjetivoItem({required this.numero, required this.texto});
-
-  final int numero;
-  final String texto;
+/// A recomendação de 0,8 g/kg/dia como número grande, com marca-texto.
+class _Recomendacao extends StatelessWidget {
+  const _Recomendacao();
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: esquema.secondaryContainer,
-              child: Text(
-                '$numero',
-                style: TextStyle(
-                  color: esquema.onSecondaryContainer,
-                  fontWeight: FontWeight.w800,
-                ),
+    final largura = MediaQuery.sizeOf(context).width;
+    final numero = MarcaTexto(
+      atraso: 0.2,
+      child: Text(
+        '0,8 g',
+        style: tema.textTheme.displayLarge
+            ?.copyWith(
+              fontSize: largura < 600 ? 72 : 112,
+              fontWeight: FontWeight.w400,
+            )
+            .fonte,
+      ),
+    );
+    final legenda = Text(
+      Problema.recomendacao,
+      style: tema.textTheme.titleMedium
+          ?.copyWith(fontWeight: FontWeight.w500, height: 1.5)
+          .fonte,
+    );
+    return Semantics(
+      container: true,
+      child: LayoutBuilder(
+        builder: (context, r) => r.maxWidth >= 640
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  numero,
+                  const SizedBox(width: 40),
+                  Expanded(child: legenda),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [numero, const SizedBox(height: 16), legenda],
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: TextoRico(
-                texto,
-                estilo: tema.textTheme.bodyLarge?.copyWith(height: 1.45),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

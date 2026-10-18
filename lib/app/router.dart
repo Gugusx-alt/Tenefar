@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 
 import '../pages/calculadora_page.dart';
-import '../pages/equipe_page.dart';
 import '../pages/inicio_page.dart';
 import '../pages/metodologia_page.dart';
 import '../pages/nao_encontrada_page.dart';
@@ -16,7 +15,6 @@ class Rotas {
   static const projeto = '/projeto';
   static const metodologia = '/metodologia';
   static const calculadora = '/calculadora';
-  static const equipe = '/equipe';
   static const referencias = '/referencias';
 }
 
@@ -29,10 +27,9 @@ class ItemMenu {
 
 const itensMenu = [
   ItemMenu(Rotas.inicio, 'Início'),
-  ItemMenu(Rotas.projeto, 'O Projeto'),
+  ItemMenu(Rotas.projeto, 'Projeto'),
   ItemMenu(Rotas.metodologia, 'Metodologia'),
   ItemMenu(Rotas.calculadora, 'Calculadora'),
-  ItemMenu(Rotas.equipe, 'Equipe'),
   ItemMenu(Rotas.referencias, 'Referências'),
 ];
 
@@ -50,7 +47,6 @@ GoRouter criarRouter({String rotaInicial = Rotas.inicio}) => GoRouter(
       path: Rotas.calculadora,
       builder: (_, _) => const CalculadoraPage(),
     ),
-    GoRoute(path: Rotas.equipe, builder: (_, _) => const EquipePage()),
     GoRoute(
       path: Rotas.referencias,
       builder: (_, _) => const ReferenciasPage(),

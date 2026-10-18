@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app/config.dart';
 import '../app/router.dart';
+import '../app/theme.dart';
+import '../data/alimentos.dart';
 import '../data/conteudo_projeto.dart';
+import '../logic/calculadora.dart';
+import '../logic/formatacao.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/card_info.dart';
-import '../widgets/grade_responsiva.dart';
+import '../widgets/indice.dart';
+import '../widgets/interacao.dart';
+import '../widgets/logo.dart';
+import '../widgets/marca_texto.dart';
 import '../widgets/secao.dart';
 import '../widgets/texto_rico.dart';
 
@@ -14,363 +21,325 @@ class InicioPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-
     return AppScaffold(
       titulo: 'Início',
       children: [
-        // ----- Hero -----
-        Secao(
-          espacoVertical: 64,
-          decoracao: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                esquema.primaryContainer.withValues(alpha: 0.55),
-                esquema.surface,
-              ],
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, restricoes) {
-              const ilustracao = _IlustracaoHero();
-              if (restricoes.maxWidth >= 820) {
-                return const Row(
-                  children: [
-                    Expanded(child: _TextoHero()),
-                    SizedBox(width: 40),
-                    ilustracao,
-                  ],
-                );
-              }
-              return const _TextoHero();
-            },
-          ),
-        ),
-
-        // ----- Resumo -----
-        Secao(
-          sobretitulo: 'Sobre o projeto',
-          titulo: 'Proteína acessível a partir da larva-da-farinha',
+        const Secao(espacoVertical: 72, child: _Abertura()),
+        SecaoEditorial(
+          numero: '01',
+          rotulo: 'Resumo',
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TextoRico(
                 InfoProjeto.resumoCurto,
-                estilo: tema.textTheme.titleMedium?.copyWith(
-                  height: 1.55,
-                  fontWeight: FontWeight.w400,
-                ),
+                estilo: Theme.of(context).textTheme.headlineMedium
+                    ?.copyWith(fontWeight: FontWeight.w300)
+                    .fonte,
               ),
-              const SizedBox(height: 16),
-              _LinhaInfo(
-                icone: Icons.account_balance_outlined,
-                texto: InfoProjeto.instituicao,
-              ),
-              _LinhaInfo(
-                icone: Icons.school_outlined,
-                texto: InfoProjeto.programa,
-              ),
-              _LinhaInfo(
-                icone: Icons.category_outlined,
-                texto: InfoProjeto.area,
+              const SizedBox(height: 48),
+              ListaDefinicoes(
+                itens: [
+                  ('Instituição', InfoProjeto.instituicao),
+                  ('Programa', InfoProjeto.programa),
+                  ('Área', InfoProjeto.area),
+                  ('Palavras-chave', InfoProjeto.palavrasChave.join(' · ')),
+                ],
               ),
             ],
           ),
         ),
-
-        // ----- Destaques -----
-        Secao(
-          espacoVertical: 16,
-          child: GradeResponsiva(
-            larguraMinimaItem: 230,
+        SecaoEditorial(
+          numero: '02',
+          rotulo: 'Explorar',
+          espacoVertical: 72,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CardInfo(
-                icone: Icons.lightbulb_outline,
-                titulo: 'O Projeto',
-                texto:
-                    'O problema da desnutrição aguda, os objetivos e os ODS '
-                    'ligados à pesquisa.',
-                rotuloAcao: 'Ver o projeto',
+              const Divider(),
+              LinhaIndice(
+                numero: '02',
+                titulo: 'Projeto',
+                descricao:
+                    'O problema da desnutrição aguda, os objetivos e os '
+                    'ODS ligados à pesquisa.',
                 aoTocar: () => context.go(Rotas.projeto),
               ),
-              CardInfo(
-                icone: Icons.timeline,
+              LinhaIndice(
+                numero: '03',
                 titulo: 'Metodologia',
-                texto:
+                descricao:
                     'Da criação das larvas às análises do pó, com o '
                     'cronograma de 12 meses.',
-                rotuloAcao: 'Ver as etapas',
                 aoTocar: () => context.go(Rotas.metodologia),
               ),
-              CardInfo(
-                icone: Icons.calculate_outlined,
+              LinhaIndice(
+                numero: '04',
                 titulo: 'Calculadora',
-                texto:
-                    'Compare a proteína de um alimento com a da farinha de '
-                    '*Tenebrio molitor*.',
-                rotuloAcao: 'Calcular',
+                descricao:
+                    'Compare a proteína de um alimento com a da farinha '
+                    'de *Tenebrio molitor*.',
                 aoTocar: () => context.go(Rotas.calculadora),
               ),
-              CardInfo(
-                icone: Icons.menu_book_outlined,
+              LinhaIndice(
+                numero: '05',
                 titulo: 'Referências',
-                texto: 'Os estudos que fundamentam o projeto.',
-                rotuloAcao: 'Ver referências',
+                descricao: 'Os estudos que fundamentam o projeto.',
                 aoTocar: () => context.go(Rotas.referencias),
               ),
             ],
           ),
         ),
+        const Secao(escuro: true, child: _ChamadaCalculadora()),
+      ],
+    );
+  }
+}
 
-        // ----- Chamada para a calculadora -----
-        Secao(
-          child: Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: esquema.primary,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Wrap(
-              spacing: 24,
-              runSpacing: 20,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              alignment: WrapAlignment.spaceBetween,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 620),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Quanto de farinha tem a proteína do seu prato?',
-                        style: tema.textTheme.headlineSmall?.copyWith(
-                          color: esquema.onPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Escolha um alimento, informe a quantidade e veja a '
-                        'equivalência em gramas e colheres de sopa.',
-                        style: tema.textTheme.bodyLarge?.copyWith(
-                          color: esquema.onPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
+/// Abertura da página: tipografia grande, logo deslocada e status.
+class _Abertura extends StatelessWidget {
+  const _Abertura();
+
+  @override
+  Widget build(BuildContext context) {
+    final m = context.marca;
+    final tema = Theme.of(context);
+    final largura = MediaQuery.sizeOf(context).width;
+    final tamanho = largura < 600 ? 52.0 : (largura < 1100 ? 76.0 : 104.0);
+    final display = tema.textTheme.displayLarge?.copyWith(
+      fontSize: tamanho,
+      letterSpacing: -tamanho * 0.028,
+    );
+    final meta = m.mono.copyWith(
+      fontSize: 12.5,
+      letterSpacing: 1.3,
+      color: m.textoSuave,
+    );
+
+    final texto = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          label: InfoProjeto.slogan,
+          excludeSemantics: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Nutrição que', style: display),
+              MarcaTexto(
+                child: Text(
+                  'transforma.',
+                  style: display
+                      ?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w400,
+                      )
+                      .fonte,
                 ),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: esquema.onPrimary,
-                    foregroundColor: esquema.primary,
-                  ),
-                  onPressed: () => context.go(Rotas.calculadora),
-                  icon: const Icon(Icons.calculate_outlined),
-                  label: const Text('Usar a calculadora'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-
-        // ----- Status -----
-        Secao(
-          espacoVertical: 24,
-          decoracao: BoxDecoration(
-            color: esquema.tertiaryContainer.withValues(alpha: 0.4),
-          ),
-          child: Wrap(
-            spacing: 16,
-            runSpacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
+        SizedBox(height: largura < 600 ? 36 : 56),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 540),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SeloStatus(InfoProjeto.status),
-              Text(
-                'Status: em andamento. Os resultados serão publicados ao final '
-                'das análises.',
-                style: tema.textTheme.bodyLarge,
+              Text('PESQUISA', style: meta),
+              const SizedBox(height: 10),
+              TextoRico(
+                InfoProjeto.titulo,
+                estilo: tema.textTheme.bodyLarge?.copyWith(
+                  fontSize: 19,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                spacing: 28,
+                runSpacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  BotaoSeta(
+                    rotulo: 'Conheça o projeto',
+                    aoTocar: () => context.go(Rotas.projeto),
+                  ),
+                  LinkSeta(
+                    rotulo: 'Usar a calculadora',
+                    aoTocar: () => context.go(Rotas.calculadora),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ],
     );
+
+    return LayoutBuilder(
+      builder: (context, r) {
+        final largo = r.maxWidth >= 860;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 24,
+              runSpacing: 6,
+              children: [
+                Text(
+                  'PIBIC · ${InfoProjeto.siglaInstituicao.toUpperCase()}',
+                  style: meta,
+                ),
+                Text('CIÊNCIA E TECNOLOGIA DE ALIMENTOS', style: meta),
+              ],
+            ),
+            SizedBox(height: largo ? 64 : 40),
+            if (largo)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 7, child: texto),
+                  // Logo deslocada para baixo: quebra o alinhamento de propósito.
+                  Expanded(
+                    flex: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 150),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: LogoEmblema(
+                          altura: r.maxWidth >= 1000 ? 280 : 210,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else ...[
+              const Align(
+                alignment: Alignment.centerRight,
+                child: LogoEmblema(altura: 96),
+              ),
+              const SizedBox(height: 24),
+              texto,
+            ],
+            SizedBox(height: largo ? 88 : 56),
+            const Divider(),
+            const SizedBox(height: 20),
+            const StatusAndamento(
+              texto: InfoProjeto.status,
+              detalhe: 'Resultados serão publicados ao final das análises.',
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
-class _TextoHero extends StatelessWidget {
-  const _TextoHero();
+/// Bloco escuro com um exemplo real calculado pela própria calculadora.
+class _ChamadaCalculadora extends StatelessWidget {
+  const _ChamadaCalculadora();
 
   @override
   Widget build(BuildContext context) {
+    final m = context.marca;
     final tema = Theme.of(context);
-    final estreito = MediaQuery.sizeOf(context).width < 600;
-    return Column(
+    final exemplo = alimentos.firstWhere(
+      (a) => a.id == 'frango-peito-grelhado',
+    );
+    const gramas = 100.0;
+    final proteina = proteinaDoAlimento(gramas, exemplo.proteinaPor100g);
+    final farinha = farinhaNecessaria(proteina);
+    final mono = m.mono.copyWith(fontSize: 13, color: m.textoSuave);
+
+    final chamada = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const RotuloSecao(numero: '04', texto: 'Calculadora'),
+        const SizedBox(height: 28),
         Text(
-          'INICIAÇÃO CIENTÍFICA · UTFPR',
-          style: tema.textTheme.labelLarge?.copyWith(
-            color: tema.colorScheme.secondary,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.4,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Semantics(
-          header: true,
-          child: TextoRico(
-            InfoProjeto.titulo,
-            estilo:
-                (estreito
-                        ? tema.textTheme.headlineSmall
-                        : tema.textTheme.headlineLarge)
-                    ?.copyWith(height: 1.2),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          InfoProjeto.fraseImpacto,
-          style: tema.textTheme.titleMedium?.copyWith(
-            color: tema.colorScheme.onSurfaceVariant,
-            height: 1.5,
-          ),
+          'Quanto de farinha tem a proteína do seu prato?',
+          style: tema.textTheme.displaySmall,
         ),
         const SizedBox(height: 20),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final palavra in InfoProjeto.palavrasChave)
-              Chip(
-                avatar: const Icon(Icons.tag, size: 18),
-                label: TextoRico(palavra),
-              ),
-          ],
+        Text(
+          'Escolha um alimento, informe a quantidade e veja a equivalência em '
+          'gramas e colheres de sopa.',
+          style: tema.textTheme.bodyLarge?.copyWith(color: m.textoSuave),
         ),
-        const SizedBox(height: 28),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            FilledButton.icon(
-              onPressed: () => context.go(Rotas.projeto),
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Conheça o projeto'),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => context.go(Rotas.calculadora),
-              icon: const Icon(Icons.calculate_outlined),
-              label: const Text('Usar a calculadora'),
-            ),
-          ],
+        const SizedBox(height: 32),
+        BotaoSeta(
+          rotulo: 'Fazer meu cálculo',
+          aoTocar: () => context.go(Rotas.calculadora),
         ),
       ],
     );
-  }
-}
 
-/// Ilustração simples feita com ícones (sem fotos de insetos).
-/// TROQUE AQUI por uma imagem em assets/images/, se quiser.
-class _IlustracaoHero extends StatelessWidget {
-  const _IlustracaoHero();
-
-  @override
-  Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-
-    Widget satelite(IconData icone, Color fundo, Color frente) => Container(
-      width: 76,
-      height: 76,
-      decoration: BoxDecoration(
-        color: fundo,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Icon(icone, color: frente, size: 34),
-    );
-
-    return ExcludeSemantics(
-      child: SizedBox(
-        width: 320,
-        height: 320,
-        child: Stack(
-          alignment: Alignment.center,
+    final equacao = Semantics(
+      label:
+          'Exemplo: ${formatarGramas(gramas)} de ${exemplo.nome} têm '
+          '${formatarGramas(proteina)} de proteína, o mesmo que cerca de '
+          '${formatarGramas(farinha)} de farinha de Tenebrio molitor.',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.only(left: 28),
+        decoration: BoxDecoration(
+          border: Border(left: BorderSide(color: m.destaque, width: 3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                color: esquema.primaryContainer,
-                shape: BoxShape.circle,
+            Text('EXEMPLO', style: mono.copyWith(letterSpacing: 1.3)),
+            const SizedBox(height: 16),
+            Text(
+              '${formatarCompacto(gramas)} g · ${exemplo.nome}',
+              style: tema.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text('= ${formatarGramas(proteina)} de proteína', style: mono),
+            const SizedBox(height: 20),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '≈ ${formatarGramas(farinha)}',
+                style: tema.textTheme.displayMedium
+                    ?.copyWith(color: m.destaque, fontWeight: FontWeight.w400)
+                    .fonte,
               ),
             ),
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                color: esquema.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.eco, size: 80, color: esquema.onPrimary),
+            TextoRico(
+              'de farinha de *Tenebrio molitor*',
+              estilo: tema.textTheme.titleMedium,
             ),
-            Positioned(
-              top: 8,
-              right: 28,
-              child: satelite(
-                Icons.science_outlined,
-                esquema.secondary,
-                esquema.onSecondary,
-              ),
-            ),
-            Positioned(
-              bottom: 16,
-              left: 12,
-              child: satelite(
-                Icons.restaurant_outlined,
-                esquema.tertiaryContainer,
-                esquema.onTertiaryContainer,
-              ),
-            ),
-            Positioned(
-              bottom: 28,
-              right: 6,
-              child: satelite(Icons.public, esquema.surface, esquema.primary),
+            const SizedBox(height: 16),
+            Text(
+              'Teor provisório da farinha: '
+              '${formatarCompacto(Config.proteinaFarinhaPor100g)} g/100 g',
+              style: mono.copyWith(fontSize: 12),
             ),
           ],
         ),
       ),
     );
-  }
-}
 
-class _LinhaInfo extends StatelessWidget {
-  const _LinhaInfo({required this.icone, required this.texto});
-
-  final IconData icone;
-  final String texto;
-
-  @override
-  Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icone, size: 20, color: tema.colorScheme.secondary),
-          const SizedBox(width: 10),
-          Expanded(child: Text(texto, style: tema.textTheme.bodyMedium)),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, r) => r.maxWidth >= 860
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(flex: 6, child: chamada),
+                const SizedBox(width: 72),
+                Expanded(flex: 4, child: equacao),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [chamada, const SizedBox(height: 48), equacao],
+            ),
     );
   }
 }

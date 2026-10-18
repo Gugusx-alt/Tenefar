@@ -2,7 +2,7 @@
 
 Repositório oficial do projeto brasileiro **TENEFAR — Nutrição que transforma**.
 
-Site e app de divulgação do projeto de Iniciação Científica (PIBIC/UTFPR)
+Site e app de divulgação do projeto de Iniciação Científica (PIBIC/Unioeste)
 **"Desenvolvimento de pó nutricional proteico à base de *Tenebrio molitor* para
 suporte nutricional em casos de desnutrição aguda"**, com uma calculadora de
 substituição proteica.
@@ -18,7 +18,6 @@ Feito em **Flutter** (Dart 3, Material 3). O alvo principal é a **web**
 | `/projeto`     | Problema, vantagens do *T. molitor*, objetivos, ODS, resultados |
 | `/metodologia` | Linha do tempo das 6 etapas e cronograma (Gantt)               |
 | `/calculadora` | Calculadora de substituição proteica e necessidade diária      |
-| `/equipe`      | Equipe e contato                                               |
 | `/referencias` | Referências bibliográficas                                     |
 
 ## Como rodar
@@ -100,16 +99,29 @@ Para líquidos, use `unidade: Unidade.ml`. Os testes verificam se os `id`s são
 
 | O quê                                  | Onde                                                  |
 | -------------------------------------- | ----------------------------------------------------- |
-| Textos do projeto, equipe e referências | `lib/data/conteudo_projeto.dart`                      |
+| Textos do projeto, contato e referências | `lib/data/conteudo_projeto.dart`                    |
 | Cores e fontes                         | `lib/app/theme.dart` (`Cores` e `_tipografia`)        |
 | Constantes da calculadora              | `lib/app/config.dart`                                 |
-| Logo da barra superior                 | `_Marca` em `lib/widgets/app_scaffold.dart`           |
-| Ilustração da página inicial           | `_IlustracaoHero` em `lib/pages/inicio_page.dart`     |
-| Logo/ícones                            | `assets/images/logo.svg` (origem), `web/icons/`, `web/favicon.png`, `android/app/src/main/res/mipmap-*/` |
+| Logo (emblema e completa)              | `assets/images/logo_emblema.png` e `logo_completo.png` (PNG transparente, pintado pela cor do tema) |
+| Ícones do app e favicon                | `web/icons/`, `web/favicon.png`, `android/app/src/main/res/mipmap-*/` |
+| Imagem de compartilhamento             | `web/og-image.png`                                    |
 | Título, descrição e Open Graph da web  | `web/index.html`                                      |
 
 Nos textos, trechos entre `*asteriscos*` aparecem em itálico (use para nomes
 científicos).
+
+## Identidade visual
+
+- **Cores:** tinta `#1A2C30` (a cor da logo) e papel `#F3EFE6` como cores
+  principais, e um único destaque ocre `#E3A22E` ("farinha dourada").
+- **Tipografia:** Fraunces (títulos, pesos leves e itálico de ênfase),
+  Instrument Sans (texto) e IBM Plex Mono (rótulos, dados e números).
+- **Layout:** coluna lateral de rótulos numerados (estilo caderno de
+  laboratório), muito espaço negativo e índice editorial no lugar de cards.
+- **Micro-interações:** o marca-texto ocre risca a palavra-chave ao aparecer,
+  os números da calculadora contam até o resultado, as linhas do índice
+  reagem ao hover e o ponto de "em andamento" pulsa algumas vezes. Todas são
+  desligadas quando o sistema pede menos animação.
 
 ## Estrutura
 
@@ -121,10 +133,10 @@ lib/
   models/     alimento.dart · item_refeicao.dart
   logic/      calculadora.dart (funções puras) · formatacao.dart
   state/      calculadora_controller.dart (Provider + ChangeNotifier)
-  pages/      inicio · projeto · metodologia · calculadora · equipe · referencias · nao_encontrada
-  widgets/    app_scaffold · secao · card_info · grade_responsiva · timeline_etapas ·
-              gantt_cronograma · ods_card · resultado_card · busca_alimento ·
-              texto_rico · entrada_animada
+  pages/      inicio · projeto · metodologia · calculadora · referencias · nao_encontrada
+  widgets/    app_scaffold · secao · indice · interacao · marca_texto · logo ·
+              grade_responsiva · timeline_etapas · gantt_cronograma · ods_card ·
+              resultado_card · busca_alimento · texto_rico · entrada_animada
 test/
   calculadora_test.dart         funções puras e base de dados
   widget_calculadora_test.dart  fluxo da calculadora

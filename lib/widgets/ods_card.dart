@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
 
-/// Card de um Objetivo de Desenvolvimento Sustentável com a cor oficial.
+/// Objetivo de Desenvolvimento Sustentável: quadrado com a cor oficial da ONU
+/// e o número, seguido do nome.
 class OdsCard extends StatelessWidget {
   const OdsCard({super.key, required this.ods});
 
@@ -10,51 +12,46 @@ class OdsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final m = context.marca;
     final tema = Theme.of(context);
     return Semantics(
       label: 'ODS ${ods.numero}: ${ods.nome}',
       excludeSemantics: true,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: m.linha)),
+        ),
+        child: Row(
           children: [
             Container(
+              width: 64,
+              height: 64,
               color: Color(ods.cor),
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    'ODS',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${ods.numero}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 36,
-                      height: 1,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.all(8),
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                '${ods.numero}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 28,
+                  height: 1,
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                ods.nome,
-                style: tema.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  height: 1.3,
-                ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'ODS ${ods.numero}',
+                    style: m.mono.copyWith(fontSize: 12, color: m.textoSuave),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(ods.nome, style: tema.textTheme.titleMedium),
+                ],
               ),
             ),
           ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app/theme.dart';
+
 /// Quebra [texto] em spans, colocando em itálico os trechos entre asteriscos.
 ///
 /// `'O *Tenebrio molitor* é...'` → "O " + itálico("Tenebrio molitor") + " é...".
@@ -11,9 +13,9 @@ List<InlineSpan> spansComItalico(String texto, {TextStyle? estilo}) {
         TextSpan(
           text: partes[i],
           style: i.isOdd
-              ? (estilo ?? const TextStyle()).copyWith(
-                  fontStyle: FontStyle.italic,
-                )
+              ? (estilo ?? const TextStyle())
+                    .copyWith(fontStyle: FontStyle.italic)
+                    .fonte
               : estilo,
         ),
   ];
@@ -40,9 +42,12 @@ class TextoRico extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Estilo completo (herdado + local) para que o itálico carregue a
+    // variante itálica real da fonte.
+    final base = DefaultTextStyle.of(context).style.merge(estilo).fonte;
     return Text.rich(
-      TextSpan(children: spansComItalico(texto)),
-      style: estilo,
+      TextSpan(children: spansComItalico(texto, estilo: base)),
+      style: base,
       textAlign: alinhamento,
       maxLines: maxLinhas,
       overflow: maxLinhas == null ? null : TextOverflow.ellipsis,

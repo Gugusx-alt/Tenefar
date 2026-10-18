@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/router.dart';
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
+import 'interacao.dart';
+import 'logo.dart';
 import 'secao.dart';
 
 /// Layout comum a todas as páginas: barra superior (links em linha em telas
@@ -18,8 +21,8 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-    final largo = MediaQuery.sizeOf(context).width >= Layout.desktop;
+    final largo = Layout.largo(context);
+    final largura = MediaQuery.sizeOf(context).width;
     // Lido do GoRouter (e não de GoRouterState) para funcionar também na 404.
     final rotaAtual = GoRouter.of(context)
         .routerDelegate
@@ -29,21 +32,27 @@ class AppScaffold extends StatelessWidget {
 
     return Title(
       title: '$titulo · ${InfoProjeto.nomeCurto}',
-      color: esquema.primary,
+      color: Cores.tinta,
       child: Scaffold(
         appBar: AppBar(
-          titleSpacing: largo ? 24 : 0,
-          title: const _Marca(),
+          titleSpacing: largo ? Layout.margem(largura) : 4,
+          // FittedBox: se o menu ocupar quase toda a barra, a marca encolhe
+          // em vez de estourar.
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: _Marca(),
+          ),
           actions: largo
               ? [
                   for (final item in itensMenu)
                     _LinkMenu(item: item, ativo: item.rota == rotaAtual),
-                  const SizedBox(width: 16),
+                  SizedBox(width: Layout.margem(largura) - 12),
                 ]
               : null,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1),
-            child: Divider(height: 1, color: esquema.outlineVariant),
+          bottom: const PreferredSize(
+            preferredSize: Size.fromHeight(1),
+            child: Divider(),
           ),
         ),
         drawer: largo ? null : _MenuLateral(rotaAtual: rotaAtual),
@@ -58,32 +67,39 @@ class AppScaffold extends StatelessWidget {
   }
 }
 
-/// Logotipo textual. TROQUE AQUI por uma imagem, se houver logo oficial.
 class _Marca extends StatelessWidget {
   const _Marca();
 
   @override
   Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-    return Semantics(
-      link: true,
-      label: '${InfoProjeto.nomeCurto}, ir para o início',
-      excludeSemantics: true,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => context.go(Rotas.inicio),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+    final m = context.marca;
+    return Interativo(
+      aoTocar: () => context.go(Rotas.inicio),
+      rotuloSemantico: '${InfoProjeto.nomeCurto}, ir para o início',
+      builder: (context, ativo) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        child: ExcludeSemantics(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: esquema.primary,
-                child: Icon(Icons.eco, size: 18, color: esquema.onPrimary),
+              AnimatedRotation(
+                // O emblema "acena" de leve no hover.
+                turns: ativo ? -0.02 : 0,
+                duration: duracaoMicro(context, 300),
+                curve: Curves.easeOutBack,
+                child: const LogoEmblema(altura: 34),
               ),
-              const SizedBox(width: 10),
-              const Text(InfoProjeto.nomeCurto),
+              const SizedBox(width: 12),
+              Text(
+                InfoProjeto.nomeCurto,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 3,
+                      color: m.texto,
+                    )
+                    .fonte,
+              ),
             ],
           ),
         ),
@@ -100,24 +116,35 @@ class _LinkMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Semantics(
-        selected: ativo,
-        child: TextButton(
-          onPressed: () => context.go(item.rota),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            backgroundColor: ativo ? esquema.secondaryContainer : null,
-            foregroundColor: ativo
-                ? esquema.onSecondaryContainer
-                : esquema.onSurface,
-            textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-              fontWeight: ativo ? FontWeight.w800 : FontWeight.w600,
-            ),
+    final m = context.marca;
+    return Semantics(
+      selected: ativo,
+      child: Interativo(
+        aoTocar: () => context.go(item.rota),
+        builder: (context, hover) => Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item.rotulo,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(
+                      fontWeight: ativo ? FontWeight.w700 : FontWeight.w500,
+                      color: ativo || hover ? m.texto : m.textoSuave,
+                    )
+                    .fonte,
+              ),
+              const SizedBox(height: 5),
+              AnimatedContainer(
+                duration: duracaoMicro(context),
+                curve: Curves.easeOutCubic,
+                height: 2,
+                width: ativo ? 20 : (hover ? 12 : 0),
+                color: ativo ? m.destaque : m.texto,
+              ),
+            ],
           ),
-          child: Text(item.rotulo),
         ),
       ),
     );
@@ -129,38 +156,67 @@ class _MenuLateral extends StatelessWidget {
 
   final String rotaAtual;
 
-  static const _icones = {
-    Rotas.inicio: Icons.home_outlined,
-    Rotas.projeto: Icons.lightbulb_outline,
-    Rotas.metodologia: Icons.timeline,
-    Rotas.calculadora: Icons.calculate_outlined,
-    Rotas.equipe: Icons.groups_outlined,
-    Rotas.referencias: Icons.menu_book_outlined,
-  };
-
   @override
   Widget build(BuildContext context) {
-    final indice = itensMenu.indexWhere((i) => i.rota == rotaAtual);
-    return NavigationDrawer(
-      selectedIndex: indice < 0 ? null : indice,
-      onDestinationSelected: (i) {
-        Navigator.of(context).pop();
-        context.go(itensMenu[i].rota);
-      },
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(28, 24, 16, 16),
-          child: Text(
-            InfoProjeto.nomeCurto,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+    final m = context.marca;
+    final tema = Theme.of(context);
+    return Drawer(
+      shape: const RoundedRectangleBorder(),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(28, 24, 20, 24),
+          children: [
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: LogoEmblema(altura: 48),
+            ),
+            const SizedBox(height: 36),
+            for (var i = 0; i < itensMenu.length; i++)
+              Semantics(
+                selected: itensMenu[i].rota == rotaAtual,
+                child: Interativo(
+                  aoTocar: () {
+                    Navigator.of(context).pop();
+                    context.go(itensMenu[i].rota);
+                  },
+                  builder: (context, _) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          child: Text(
+                            (i + 1).toString().padLeft(2, '0'),
+                            style: m.mono.copyWith(
+                              fontSize: 12,
+                              color: m.textoSuave,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            itensMenu[i].rotulo,
+                            style: tema.textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontStyle: itensMenu[i].rota == rotaAtual
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
+                                )
+                                .fonte,
+                          ),
+                        ),
+                        if (itensMenu[i].rota == rotaAtual)
+                          Container(width: 8, height: 8, color: m.destaque),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
-        for (final item in itensMenu)
-          NavigationDrawerDestination(
-            icon: Icon(_icones[item.rota]),
-            label: Text(item.rotulo),
-          ),
-      ],
+      ),
     );
   }
 }
@@ -170,88 +226,89 @@ class _Rodape extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final m = context.marca;
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-    final estiloTitulo = tema.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w800,
-      color: esquema.onSurface,
+    final rotulo = m.mono.copyWith(
+      fontSize: 12,
+      letterSpacing: 1.2,
+      color: m.textoSuave,
     );
-    final estiloTexto = tema.textTheme.bodyMedium?.copyWith(
-      color: esquema.onSurfaceVariant,
+    final texto = tema.textTheme.bodyMedium?.copyWith(color: m.textoSuave);
+
+    final navegacao = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('NAVEGAR', style: rotulo),
+        const SizedBox(height: 12),
+        for (final item in itensMenu)
+          LinkSeta(
+            rotulo: item.rotulo,
+            aoTocar: () => context.go(item.rota),
+            estilo: tema.textTheme.bodyLarge,
+          ),
+      ],
     );
 
-    return Container(
-      color: esquema.surfaceContainerHighest,
-      child: Secao(
-        espacoVertical: 32,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 48,
-              runSpacing: 24,
-              children: [
-                SizedBox(
-                  width: 280,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(InfoProjeto.nomeCurto, style: estiloTitulo),
-                      const SizedBox(height: 4),
-                      Text(InfoProjeto.slogan, style: estiloTexto),
-                      const SizedBox(height: 8),
-                      Text(
-                        'UTFPR · PIBIC · ${DateTime.now().year}',
-                        style: estiloTexto,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 240,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Contato', style: estiloTitulo),
-                      const SizedBox(height: 4),
-                      Text(Equipe.email, style: estiloTexto),
-                      Text(Equipe.campus, style: estiloTexto),
-                    ],
-                  ),
-                ),
-                Column(
+    final projeto = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('PROJETO', style: rotulo),
+        const SizedBox(height: 12),
+        Text(InfoProjeto.instituicao, style: texto),
+        const SizedBox(height: 6),
+        Text('Programa de Iniciação Científica (PIBIC)', style: texto),
+        const SizedBox(height: 20),
+        Text('CONTATO', style: rotulo),
+        const SizedBox(height: 12),
+        SelectableText(Contato.email, style: texto),
+      ],
+    );
+
+    return Secao(
+      espacoVertical: 72,
+      animar: false,
+      child: LayoutBuilder(
+        builder: (context, restricoes) {
+          final largo = restricoes.maxWidth >= 860;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Divider(),
+              const SizedBox(height: 48),
+              if (largo)
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Links rápidos', style: estiloTitulo),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 4,
-                      children: [
-                        for (final item in itensMenu.skip(1))
-                          TextButton(
-                            onPressed: () => context.go(item.rota),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                            ),
-                            child: Text(item.rotulo),
-                          ),
-                      ],
+                    const Expanded(
+                      flex: 5,
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: LogoCompleto(altura: 150),
+                      ),
                     ),
+                    Expanded(flex: 3, child: navegacao),
+                    Expanded(flex: 4, child: projeto),
                   ],
+                )
+              else ...[
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: LogoCompleto(altura: 120),
                 ),
+                const SizedBox(height: 40),
+                navegacao,
+                const SizedBox(height: 32),
+                projeto,
               ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Projeto de Iniciação Científica · ${InfoProjeto.instituicao}',
-              style: tema.textTheme.bodySmall?.copyWith(
-                color: esquema.onSurfaceVariant,
+              const SizedBox(height: 56),
+              Text(
+                '${InfoProjeto.nomeCurto} · ${InfoProjeto.siglaInstituicao} · '
+                'PIBIC · ${DateTime.now().year}',
+                style: rotulo,
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/interacao.dart';
 import '../widgets/secao.dart';
 import '../widgets/texto_rico.dart';
 
@@ -24,65 +26,73 @@ class ReferenciasPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
+    final m = context.marca;
 
     return AppScaffold(
       titulo: 'Referências',
       children: [
-        Secao(
-          sobretitulo: 'Referências',
-          titulo: 'Bibliografia do projeto',
+        const CabecalhoPagina(
+          numero: '05',
+          rotulo: 'Referências',
+          titulo: 'Bibliografia',
+        ),
+        SecaoEditorial(
+          rotulo: '${referencias.length} obras',
+          espacoVertical: 24,
           child: SelectionArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (var i = 0; i < referencias.length; i++) ...[
-                  if (i > 0) const Divider(height: 32),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 36,
-                        child: Text(
-                          '${i + 1}.',
-                          style: tema.textTheme.titleMedium?.copyWith(
-                            color: esquema.secondary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextoRico(
-                              referencias[i].texto,
-                              estilo: tema.textTheme.bodyLarge?.copyWith(
-                                height: 1.55,
+                for (var i = 0; i < referencias.length; i++)
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 22),
+                    decoration: BoxDecoration(
+                      border: i == 0
+                          ? null
+                          : Border(top: BorderSide(color: m.linha)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 52,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '[${i + 1}]',
+                              style: m.mono.copyWith(
+                                fontSize: 13,
+                                color: m.textoSuave,
                               ),
                             ),
-                            if (referencias[i].url != null) ...[
-                              const SizedBox(height: 6),
-                              TextButton.icon(
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                ),
-                                onPressed: () =>
-                                    _abrir(context, referencias[i].url!),
-                                icon: const Icon(Icons.open_in_new, size: 18),
-                                label: const Text('Abrir link'),
-                              ),
-                            ],
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextoRico(
+                                referencias[i].texto,
+                                estilo: tema.textTheme.bodyLarge,
+                              ),
+                              if (referencias[i].url != null)
+                                LinkSeta(
+                                  rotulo: 'Abrir link',
+                                  icone: Icons.north_east,
+                                  aoTocar: () =>
+                                      _abrir(context, referencias[i].url!),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
               ],
             ),
           ),
         ),
+        const SizedBox(height: 72),
       ],
     );
   }

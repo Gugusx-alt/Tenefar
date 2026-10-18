@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../app/config.dart';
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
 import '../logic/calculadora.dart';
 import '../logic/formatacao.dart';
@@ -34,32 +35,38 @@ class _CalculadoraPageState extends State<CalculadoraPage>
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final m = context.marca;
+    final estreito = MediaQuery.sizeOf(context).width < 600;
 
     return AppScaffold(
       titulo: 'Calculadora',
       children: [
+        CabecalhoPagina(
+          numero: '04',
+          rotulo: 'Calculadora',
+          titulo: 'Calculadora de substituição *proteica*',
+          introducao:
+              'Escolha um alimento e informe a quantidade: a calculadora '
+              'mostra quantos gramas da farinha de *Tenebrio molitor* '
+              'fornecem a mesma quantidade de proteína.',
+          extra: Config.valorProvisorio
+              ? const _Nota(
+                  rotulo: 'Valor provisório',
+                  texto: TextosCalculadora.avisoProvisorio,
+                )
+              : null,
+        ),
         Secao(
-          sobretitulo: 'Ferramenta',
-          titulo: 'Calculadora de substituição proteica',
+          espacoVertical: 0,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextoRico(
-                'Escolha um alimento e informe a quantidade: a calculadora '
-                'mostra quantos gramas da farinha de *Tenebrio molitor* '
-                'fornecem a mesma quantidade de proteína.',
-                estilo: tema.textTheme.bodyLarge?.copyWith(height: 1.5),
-              ),
-              if (Config.valorProvisorio) ...[
-                const SizedBox(height: 16),
-                const _Alerta(
-                  icone: Icons.warning_amber_rounded,
-                  texto: TextosCalculadora.avisoProvisorio,
+              Container(
+                decoration: BoxDecoration(
+                  color: m.painel,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: m.linha),
                 ),
-              ],
-              const SizedBox(height: 24),
-              Card(
                 clipBehavior: Clip.antiAlias,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -67,20 +74,12 @@ class _CalculadoraPageState extends State<CalculadoraPage>
                     TabBar(
                       controller: _abas,
                       tabs: const [
-                        Tab(
-                          icon: Icon(Icons.swap_horiz),
-                          text: 'Substituir alimento',
-                        ),
-                        Tab(
-                          icon: Icon(Icons.today_outlined),
-                          text: 'Necessidade diária',
-                        ),
+                        Tab(text: 'Substituir alimento'),
+                        Tab(text: 'Necessidade diária'),
                       ],
                     ),
                     Padding(
-                      padding: EdgeInsets.all(
-                        MediaQuery.sizeOf(context).width < 600 ? 16 : 24,
-                      ),
+                      padding: EdgeInsets.all(estreito ? 16 : 32),
                       child: _abas.index == 0
                           ? const _AbaSubstituir()
                           : const _AbaNecessidade(),
@@ -88,12 +87,13 @@ class _CalculadoraPageState extends State<CalculadoraPage>
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              const _Alerta(
-                icone: Icons.health_and_safety_outlined,
+              const SizedBox(height: 40),
+              const _Nota(
+                rotulo: 'Aviso',
                 texto: TextosCalculadora.avisoFinal,
-                discreto: true,
+                discreta: true,
               ),
+              const SizedBox(height: 72),
             ],
           ),
         ),
@@ -156,23 +156,23 @@ class _AbaSubstituirState extends State<_AbaSubstituir> {
       children: [
         LayoutBuilder(
           builder: (context, restricoes) {
-            if (restricoes.maxWidth >= 720) {
+            if (restricoes.maxWidth >= 760) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(flex: 11, child: formulario),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 40),
                   Expanded(flex: 9, child: resultado),
                 ],
               );
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [formulario, const SizedBox(height: 20), resultado],
+              children: [formulario, const SizedBox(height: 24), resultado],
             );
           },
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 40),
         const _Refeicao(),
       ],
     );
@@ -193,33 +193,33 @@ class _Formulario extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final m = context.marca;
     final ctrl = context.watch<CalculadoraController>();
     final alimento = ctrl.alimento;
     final porcao = alimento?.porcao;
     final simbolo = alimento?.simboloUnidade ?? 'g';
     final emPorcoes = ctrl.modo == ModoQuantidade.porcoes;
+    final nota = tema.textTheme.bodySmall?.copyWith(color: m.textoSuave);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _Passo(numero: 1, texto: 'Escolha o alimento'),
-        const SizedBox(height: 12),
+        const _Passo(numero: 1, texto: 'Escolha o alimento'),
+        const SizedBox(height: 14),
         BuscaAlimento(aoSelecionar: aoSelecionarAlimento),
-        const SizedBox(height: 24),
-        _Passo(numero: 2, texto: 'Informe a quantidade'),
-        const SizedBox(height: 12),
+        const SizedBox(height: 36),
+        const _Passo(numero: 2, texto: 'Informe a quantidade'),
+        const SizedBox(height: 14),
         SegmentedButton<ModoQuantidade>(
           showSelectedIcon: false,
           segments: [
             ButtonSegment(
               value: ModoQuantidade.massa,
               label: Text(simbolo == 'ml' ? 'ml' : 'gramas'),
-              icon: const Icon(Icons.scale_outlined),
             ),
             ButtonSegment(
               value: ModoQuantidade.porcoes,
               label: const Text('porções'),
-              icon: const Icon(Icons.restaurant_outlined),
               enabled: porcao != null,
               tooltip: porcao == null
                   ? 'Este alimento não tem porção caseira cadastrada'
@@ -242,7 +242,7 @@ class _Formulario extends StatelessWidget {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.,\-]')),
           ],
-          style: tema.textTheme.headlineSmall,
+          style: m.mono.copyWith(fontSize: 24, color: m.texto),
           decoration: InputDecoration(
             labelText: emPorcoes
                 ? 'Quantidade de porções'
@@ -256,39 +256,25 @@ class _Formulario extends StatelessWidget {
           ),
         ),
         if (porcao != null) ...[
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Icon(
-                Icons.restaurant,
-                size: 18,
-                color: tema.colorScheme.secondary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '1 porção = ${porcao.descricao} '
-                  '(${formatarCompacto(porcao.gramas)} $simbolo)',
-                  style: tema.textTheme.bodyMedium,
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          Text(
+            '1 porção = ${porcao.descricao} '
+            '(${formatarCompacto(porcao.gramas)} $simbolo)',
+            style: m.mono.copyWith(fontSize: 13, color: m.texto),
           ),
         ],
         if (alimento?.liquido ?? false) ...[
           const SizedBox(height: 6),
-          Text(
-            TextosCalculadora.notaMl,
-            style: tema.textTheme.bodySmall?.copyWith(
-              color: tema.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          Text(TextosCalculadora.notaMl, style: nota),
         ],
-        const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: ctrl.podeAdicionar ? ctrl.adicionarARefeicao : null,
-          icon: const Icon(Icons.add),
-          label: const Text('Adicionar à refeição'),
+        const SizedBox(height: 28),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            onPressed: ctrl.podeAdicionar ? ctrl.adicionarARefeicao : null,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Adicionar à refeição'),
+          ),
         ),
       ],
     );
@@ -303,31 +289,30 @@ class _Passo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final m = context.marca;
     return Semantics(
       header: true,
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 13,
-            backgroundColor: tema.colorScheme.secondary,
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            color: m.destaque,
             child: Text(
               '$numero',
-              style: TextStyle(
-                color: tema.colorScheme.onSecondary,
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-              ),
+              style: m.mono
+                  .copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Cores.tinta,
+                  )
+                  .fonte,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              texto,
-              style: tema.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            child: Text(texto, style: Theme.of(context).textTheme.titleMedium),
           ),
         ],
       ),
@@ -335,111 +320,122 @@ class _Passo extends StatelessWidget {
   }
 }
 
-/// Lista de alimentos adicionados e totais.
+/// Lista de alimentos adicionados e totais, no estilo de uma nota/recibo.
 class _Refeicao extends StatelessWidget {
   const _Refeicao();
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
+    final m = context.marca;
     final ctrl = context.watch<CalculadoraController>();
     final itens = ctrl.refeicao;
+    final mono = m.mono.copyWith(fontSize: 13, color: m.textoSuave);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: esquema.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.restaurant_menu, color: esquema.primary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    'Montar refeição',
-                    style: tema.textTheme.titleLarge,
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Divider(),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(
+                  'Montar refeição',
+                  style: tema.textTheme.headlineMedium,
                 ),
               ),
-              if (itens.isNotEmpty)
-                TextButton.icon(
-                  onPressed: ctrl.limparRefeicao,
-                  icon: const Icon(Icons.delete_sweep_outlined),
-                  label: const Text('Limpar'),
-                ),
-            ],
-          ),
+            ),
+            if (itens.isNotEmpty)
+              TextButton.icon(
+                onPressed: ctrl.limparRefeicao,
+                icon: const Icon(Icons.close, size: 18),
+                label: const Text('Limpar'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (itens.isEmpty)
+          Text(
+            'Use "Adicionar à refeição" para somar vários alimentos e ver o '
+            'total de proteína e de farinha equivalente.',
+            style: tema.textTheme.bodyMedium?.copyWith(color: m.textoSuave),
+          )
+        else ...[
           const SizedBox(height: 8),
-          if (itens.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                'Use "Adicionar à refeição" para somar vários alimentos e ver o '
-                'total de proteína e de farinha equivalente.',
-                style: tema.textTheme.bodyMedium?.copyWith(
-                  color: esquema.onSurfaceVariant,
+          for (var i = 0; i < itens.length; i++)
+            Dismissible(
+              key: ObjectKey(itens[i]),
+              direction: DismissDirection.endToStart,
+              onDismissed: (_) => ctrl.removerItem(i),
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 16),
+                color: m.destaque.withValues(alpha: 0.35),
+                child: Icon(Icons.delete_outline, color: m.texto),
+              ),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: m.linha)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            itens[i].alimento.nome,
+                            style: tema.textTheme.titleSmall,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${itens[i].descricaoQuantidade} · '
+                            '${formatarGramas(itens[i].proteina)} de proteína · '
+                            '${formatarGramas(itens[i].farinha)} de farinha',
+                            style: mono,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Remover ${itens[i].alimento.nome}',
+                      icon: const Icon(Icons.close, size: 20),
+                      onPressed: () => ctrl.removerItem(i),
+                    ),
+                  ],
                 ),
               ),
-            )
-          else ...[
-            for (var i = 0; i < itens.length; i++)
-              Dismissible(
-                key: ObjectKey(itens[i]),
-                direction: DismissDirection.endToStart,
-                onDismissed: (_) => ctrl.removerItem(i),
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 16),
-                  color: esquema.errorContainer,
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: esquema.onErrorContainer,
-                  ),
-                ),
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(itens[i].alimento.nome),
-                  subtitle: Text(
-                    '${itens[i].descricaoQuantidade} · '
-                    '${formatarGramas(itens[i].proteina)} de proteína · '
-                    '${formatarGramas(itens[i].farinha)} de farinha',
-                  ),
-                  trailing: IconButton(
-                    tooltip: 'Remover ${itens[i].alimento.nome}',
-                    icon: const Icon(Icons.close),
-                    onPressed: () => ctrl.removerItem(i),
-                  ),
-                ),
-              ),
-            const Divider(height: 24),
-            Semantics(
+            ),
+          Container(
+            padding: const EdgeInsets.only(top: 20),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: m.texto, width: 1.5)),
+            ),
+            child: Semantics(
               liveRegion: true,
               child: Wrap(
-                spacing: 24,
-                runSpacing: 8,
+                spacing: 56,
+                runSpacing: 16,
                 children: [
                   _Total(
                     rotulo: 'Total de proteína',
-                    valor: formatarGramas(ctrl.totalProteinaRefeicao),
+                    valor: ctrl.totalProteinaRefeicao,
                   ),
                   _Total(
                     rotulo: 'Total de farinha de *Tenebrio*',
-                    valor: formatarGramas(ctrl.totalFarinhaRefeicao),
+                    valor: ctrl.totalFarinhaRefeicao,
                     destaque: true,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 }
@@ -452,23 +448,36 @@ class _Total extends StatelessWidget {
   });
 
   final String rotulo;
-  final String valor;
+  final double valor;
   final bool destaque;
 
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
+    final m = context.marca;
+    final numero = NumeroContado(
+      valor: valor,
+      formatar: formatarGramas,
+      estilo: tema.textTheme.headlineLarge,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextoRico(rotulo, estilo: tema.textTheme.bodyMedium),
-        Text(
-          valor,
-          style: tema.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: destaque ? tema.colorScheme.primary : null,
-          ),
+        TextoRico(
+          rotulo,
+          estilo: tema.textTheme.bodyMedium?.copyWith(color: m.textoSuave),
         ),
+        const SizedBox(height: 4),
+        // O total de farinha recebe o marca-texto ocre, como no resto do site.
+        if (destaque)
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: m.destaque, width: 4)),
+            ),
+            child: numero,
+          )
+        else
+          numero,
       ],
     );
   }
@@ -499,7 +508,7 @@ class _AbaNecessidadeState extends State<_AbaNecessidade> {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
+    final m = context.marca;
     final ctrl = context.watch<CalculadoraController>();
     final proteina = ctrl.proteinaDiariaG;
     final farinha = ctrl.farinhaDiariaG;
@@ -507,6 +516,8 @@ class _AbaNecessidadeState extends State<_AbaNecessidade> {
     final campo = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const _Passo(numero: 1, texto: 'Informe o peso corporal'),
+        const SizedBox(height: 14),
         TextFormField(
           key: const Key('campo-peso'),
           controller: _peso,
@@ -515,7 +526,7 @@ class _AbaNecessidadeState extends State<_AbaNecessidade> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.,\-]')),
           ],
-          style: tema.textTheme.headlineSmall,
+          style: m.mono.copyWith(fontSize: 24, color: m.texto),
           decoration: InputDecoration(
             labelText: 'Peso corporal (kg)',
             hintText: 'ex.: 70',
@@ -523,13 +534,10 @@ class _AbaNecessidadeState extends State<_AbaNecessidade> {
             errorText: ctrl.erroPeso,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Text(
           TextosCalculadora.notaNecessidade,
-          style: tema.textTheme.bodyMedium?.copyWith(
-            color: esquema.onSurfaceVariant,
-            height: 1.45,
-          ),
+          style: tema.textTheme.bodyMedium?.copyWith(color: m.textoSuave),
         ),
       ],
     );
@@ -537,115 +545,134 @@ class _AbaNecessidadeState extends State<_AbaNecessidade> {
     final resultado = Semantics(
       liveRegion: true,
       container: true,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: esquema.primaryContainer.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: esquema.primary.withValues(alpha: 0.25)),
-        ),
+      child: PainelResultado(
         child: proteina == null || farinha == null
-            ? Text(
-                'Digite o peso para calcular a proteína mínima diária.',
-                style: tema.textTheme.bodyLarge,
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const RotuloMono('Resultado'),
+                  const SizedBox(height: 16),
                   Text(
-                    'Proteína mínima por dia',
-                    style: tema.textTheme.bodyLarge,
-                  ),
-                  Text(
-                    formatarGramas(proteina),
-                    style: tema.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const Divider(height: 28),
-                  TextoRico(
-                    'Farinha de *Tenebrio* que cobriria esse valor',
-                    estilo: tema.textTheme.bodyLarge,
-                  ),
-                  FittedBox(
-                    alignment: Alignment.centerLeft,
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      formatarGramas(farinha),
-                      style: tema.textTheme.displaySmall?.copyWith(
-                        color: esquema.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '≈ ${formatarNumero(colheresDeSopa(farinha))} colheres de sopa',
-                    style: tema.textTheme.titleMedium?.copyWith(
-                      color: esquema.onSurfaceVariant,
-                    ),
+                    'Digite o peso para calcular a proteína mínima diária.',
+                    style: tema.textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w300)
+                        .fonte,
                   ),
                 ],
+              )
+            : Builder(
+                builder: (context) {
+                  final mb = context.marca;
+                  final tb = Theme.of(context);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const RotuloMono('Proteína mínima por dia'),
+                      const SizedBox(height: 4),
+                      NumeroContado(
+                        valor: proteina,
+                        formatar: formatarGramas,
+                        estilo: mb.mono
+                            .copyWith(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: mb.texto,
+                            )
+                            .fonte,
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(),
+                      const SizedBox(height: 24),
+                      TextoRico(
+                        'Farinha de *Tenebrio* que cobriria esse valor',
+                        estilo: tb.textTheme.titleMedium,
+                      ),
+                      FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: NumeroContado(
+                          valor: farinha,
+                          formatar: formatarGramas,
+                          estilo: tb.textTheme.displayMedium
+                              ?.copyWith(
+                                color: mb.destaque,
+                                fontWeight: FontWeight.w400,
+                              )
+                              .fonte,
+                        ),
+                      ),
+                      Text(
+                        '≈ ${ResultadoCard.colheres(colheresDeSopa(farinha))}',
+                        style: mb.mono.copyWith(
+                          fontSize: 14,
+                          color: mb.textoSuave,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
       ),
     );
 
     return LayoutBuilder(
-      builder: (context, restricoes) => restricoes.maxWidth >= 720
+      builder: (context, restricoes) => restricoes.maxWidth >= 760
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: campo),
-                const SizedBox(width: 24),
-                Expanded(child: resultado),
+                Expanded(flex: 11, child: campo),
+                const SizedBox(width: 40),
+                Expanded(flex: 9, child: resultado),
               ],
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [campo, const SizedBox(height: 20), resultado],
+              children: [campo, const SizedBox(height: 24), resultado],
             ),
     );
   }
 }
 
-class _Alerta extends StatelessWidget {
-  const _Alerta({
-    required this.icone,
+/// Nota com fio ocre à esquerda e rótulo mono.
+class _Nota extends StatelessWidget {
+  const _Nota({
+    required this.rotulo,
     required this.texto,
-    this.discreto = false,
+    this.discreta = false,
   });
 
-  final IconData icone;
+  final String rotulo;
   final String texto;
-  final bool discreto;
+  final bool discreta;
 
   @override
   Widget build(BuildContext context) {
-    final esquema = Theme.of(context).colorScheme;
-    final fundo = discreto
-        ? esquema.surfaceContainerHighest
-        : esquema.tertiaryContainer;
-    final frente = discreto
-        ? esquema.onSurfaceVariant
-        : esquema.onTertiaryContainer;
+    final m = context.marca;
     return Semantics(
       container: true,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 20),
         decoration: BoxDecoration(
-          color: fundo,
-          borderRadius: BorderRadius.circular(12),
+          border: Border(
+            left: BorderSide(color: discreta ? m.linha : m.destaque, width: 3),
+          ),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icone, color: frente),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                texto,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: frente, height: 1.45),
+            Text(
+              rotulo.toUpperCase(),
+              style: m.mono.copyWith(
+                fontSize: 12,
+                letterSpacing: 1.2,
+                color: m.textoSuave,
               ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              texto,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: discreta ? m.textoSuave : m.texto),
             ),
           ],
         ),

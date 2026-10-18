@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../app/theme.dart';
 import '../data/conteudo_projeto.dart';
 import 'texto_rico.dart';
 
-/// Linha do tempo vertical das etapas da metodologia.
+/// Linha do tempo vertical das etapas da metodologia: número mono, fio
+/// vertical, ícone e título serifado.
 class TimelineEtapas extends StatelessWidget {
   const TimelineEtapas({super.key, required this.etapas});
 
@@ -12,7 +14,7 @@ class TimelineEtapas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
+    final m = context.marca;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -21,74 +23,74 @@ class TimelineEtapas extends StatelessWidget {
           Semantics(
             container: true,
             label: 'Etapa ${i + 1} de ${etapas.length}: ${etapas[i].titulo}',
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    width: 56,
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: esquema.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            etapas[i].icone,
-                            color: esquema.onPrimary,
-                          ),
+            child: Stack(
+              children: [
+                // Fio que liga esta etapa à próxima.
+                if (i < etapas.length - 1)
+                  Positioned(
+                    left: 3.5,
+                    top: 44,
+                    bottom: 0,
+                    width: 1,
+                    child: ColoredBox(color: m.linha),
+                  ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: i < etapas.length - 1 ? 48 : 0,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 56,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              (i + 1).toString().padLeft(2, '0'),
+                              style: m.mono.copyWith(
+                                fontSize: 13,
+                                color: m.textoSuave,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Container(width: 8, height: 8, color: m.destaque),
+                          ],
                         ),
-                        if (i < etapas.length - 1)
-                          Expanded(
-                            child: Container(
-                              width: 3,
-                              margin: const EdgeInsets.symmetric(vertical: 4),
-                              color: esquema.primary.withValues(alpha: 0.3),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: 4,
-                        bottom: i < etapas.length - 1 ? 32 : 0,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'ETAPA ${i + 1}',
-                            style: tema.textTheme.labelMedium?.copyWith(
-                              color: esquema.secondary,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(etapas[i].icone, size: 22, color: m.texto),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    etapas[i].titulo,
+                                    style: tema.textTheme.headlineMedium,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            etapas[i].titulo,
-                            style: tema.textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 6),
-                          TextoRico(
-                            etapas[i].descricao,
-                            estilo: tema.textTheme.bodyLarge?.copyWith(
-                              color: esquema.onSurfaceVariant,
-                              height: 1.5,
+                            const SizedBox(height: 12),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 640),
+                              child: TextoRico(
+                                etapas[i].descricao,
+                                estilo: tema.textTheme.bodyLarge?.copyWith(
+                                  color: m.textoSuave,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],

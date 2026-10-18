@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../app/theme.dart';
 import '../data/alimentos.dart';
 import '../logic/calculadora.dart';
 import '../logic/formatacao.dart';
@@ -142,6 +143,12 @@ class _BuscaAlimentoState extends State<BuscaAlimento> {
             for (final categoria in Categorias.todas)
               FilterChip(
                 label: Text(categoria),
+                // Sobre o ocre o texto é sempre tinta (contraste nos dois modos).
+                labelStyle: tema.textTheme.labelLarge?.copyWith(
+                  color: categorias.contains(categoria)
+                      ? Cores.tinta
+                      : tema.colorScheme.onSurface,
+                ),
                 selected: categorias.contains(categoria),
                 onSelected: (_) => _alternarCategoria(categoria),
               ),
@@ -166,6 +173,7 @@ class _ListaOpcoes extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 6,
+        color: context.marca.painel,
         borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(

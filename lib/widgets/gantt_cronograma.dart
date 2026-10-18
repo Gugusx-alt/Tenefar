@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/conteudo_projeto.dart';
+import '../app/theme.dart';
 import 'texto_rico.dart';
 
 /// Gráfico de Gantt do cronograma feito só com widgets.
@@ -34,30 +35,28 @@ class _GanttCronogramaState extends State<GanttCronograma> {
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final esquema = tema.colorScheme;
-
+    final m = context.marca;
+    final estiloCabecalho = m.mono.copyWith(
+      fontSize: 12,
+      letterSpacing: 1.1,
+      color: m.textoSuave,
+    );
     final cabecalho = Row(
       children: [
         SizedBox(
           width: _larguraRotulo,
-          child: Text(
-            'Atividade',
-            style: tema.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Text('ATIVIDADE', style: estiloCabecalho),
           ),
         ),
         for (final mes in widget.meses)
           SizedBox(
             width: _larguraMes,
             child: Text(
-              mes,
+              mes.toUpperCase(),
               textAlign: TextAlign.center,
-              style: tema.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: esquema.onSurfaceVariant,
-              ),
+              style: estiloCabecalho,
             ),
           ),
       ],
