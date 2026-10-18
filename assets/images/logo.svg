@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Logo placeholder do TENEFAR: folha/grão verde sobre fundo aveia. Troque à vontade. -->
+  <rect width="512" height="512" rx="112" fill="#3F7D4E"/>
+  <circle cx="256" cy="256" r="168" fill="#F7F2E7"/>
+  <path d="M256 124 C 344 188, 344 324, 256 388 C 168 324, 168 188, 256 124 Z" fill="#3F7D4E"/>
+  <path d="M256 168 V 356" stroke="#F7F2E7" stroke-width="14" stroke-linecap="round"/>
+  <path d="M256 232 L 298 204 M256 280 L 214 252 M256 324 L 294 298" stroke="#F7F2E7" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="370" cy="146" r="32" fill="#C9973F"/>
+</svg>

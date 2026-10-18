@@ -1,0 +1,34 @@
+name: tenebrio_app
+description: "TENEFAR — site e app de divulgação do projeto PIBIC/UTFPR sobre pó nutricional proteico à base de Tenebrio molitor."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.5
+
+# Versões fixadas para builds reprodutíveis.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  go_router: 18.1.0
+  google_fonts: 9.0.0
+  intl: 0.20.3
+  provider: 6.1.5+1
+  url_launcher: 6.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Ilustrações e ícones do app. Coloque novas imagens em assets/images/.
+  assets:
+    - assets/images/
